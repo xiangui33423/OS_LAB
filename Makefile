@@ -42,3 +42,10 @@ os-image: boot.bin kernel.bin
 # Run operating system on emulated x86.
 run: os-image
 	qemu-system-x86_64 -drive file=os-image,format=raw -net none
+
+%.elf: %.bin
+	objcopy -I binary $^ $@
+
+gdb: kernel.elf
+	qemu-system-x86_64 -drive file=os-image,format=raw -net none
+	gdb -ex "target remote localhost:1234"
