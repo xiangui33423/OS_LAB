@@ -52,10 +52,40 @@ load_kernel_from_disk:
   mov bx, MSG_LOAD_KERNEL ; Print message for kernel load.
   call print_string
 
-  ; ...
+  mov AX, 0x201
+  mov CX, 0x1   
+  mov DH, 0x0
+  mov DL, 0x80
+  mov ES, SP
+  mov BX, KERNEL_OFFSET
+  int 0x13
 
+  cmp AH, 0
+  jz print_sucess
+  mov bx, MSG_SSD_FAILED
+print_failed:
+  call print_string
+  jmp JUDGE
+print_sucess:
+  mov bx, MSG_SSD_SUCCESS
+  call print_string
+
+JUDGE:
+  mov bx, 0
+  add bx, KERNEL_OFFSET
+  add bx, 0x01FE
+  mov AX, ES:[BX]
+
+  cmp AX, 0xaa55 
+  jz print_success_load_kernel
+print_failed_load_kernel:
+  mov bx, MSG_KERNEL_LOAD_FAILED
+  call print_string
   ret
-
+print_success_load_kernel:
+  mov bx, MSG_KERNEL_LOAD_SUCCESS
+  call print_string
+  ret
 
 ;
 ; Part 2
@@ -66,6 +96,7 @@ load_kernel_from_disk:
 
 gdt_start:
 ; ...
+
 
 gdt_end:
 ; ...
@@ -127,12 +158,24 @@ BOOT_DRIVE db 0x0
 MSG_REAL_MODE:
   db "started in 16-bit real mode", 0xa, 0xd, 0x0
 
-MSG_LOAD_KERNEL:
-  db "loading kernel into memory...", 0x0
 
 MSG_PMODE:
   db "successfully landed in 32-bit protected mode.", 0x0
 
+MSG_SSD_SUCCESS:
+  db "load ssd success", 0xa, 0xd, 0x0
+
+MSG_SSD_FAILED:
+  db "load ssd failed", 0xa, 0xd, 0x0
+
+MSG_KERNEL_LOAD_SUCCESS:
+  db "load kernel success", 0xa, 0xd, 0x0
+
+MSG_KERNEL_LOAD_FAILED:
+  db "load kernel failed", 0xa, 0xd, 0x0
+
+MSG_LOAD_KERNEL:
+  db "loading kernel into memory...", 0xa, 0xd, 0x0
 ; Boot sector padding
 times 510-($-$$) db 0x0
 dw 0xaa55
