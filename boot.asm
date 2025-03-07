@@ -94,17 +94,38 @@ print_success_load_kernel:
 ; Implement your GDT set up code below
 ;
 
-gdt_start:
-; ...
 
+
+
+gdt_start:
+  ; Null Descriptor 
+  dd 0x00000000
+  dd 0x00000000
+
+  ; Code segment descriptor
+  dd 0x0000ffff
+  dd 0x00cf9200
+
+  ; Data Segment Descriptor
+  dd 0x0000ffff
+  dd 0x00cf9200
 
 gdt_end:
 ; ...
 
 gdt_descriptor:
 ; ...
+  dw gdt_end - gdt_start - 1
+  dd gdt_start
+  
+  ; lgdt [gdt_descriptor]
 
-
+  ; mov ax, 0x10
+  ; mov ds, ax
+  ; mov es, ax
+  ; mov fs, ax
+  ; mov gs, ax
+  ; mov ss, ax  
 
 ;
 ; Part 3
@@ -179,3 +200,6 @@ MSG_LOAD_KERNEL:
 ; Boot sector padding
 times 510-($-$$) db 0x0
 dw 0xaa55
+
+
+
