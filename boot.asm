@@ -101,14 +101,22 @@ gdt_start:
   ; Null Descriptor 
   dd 0x00000000
   dd 0x00000000
-
+gdt_code:
   ; Code segment descriptor
-  dd 0x0000ffff
-  dd 0x00cf9200
-
+  dw 0xffff     
+  dw 0x0          
+  db 0x0          
+  db 10011010b    
+  db 11001111b    
+  db 0x0          
+gdt_data:
   ; Data Segment Descriptor
-  dd 0x0000ffff
-  dd 0x00cf9200
+  dw 0xffff       
+  dw 0x0        
+  db 0x0        
+  db 10010010b  
+  db 11001111b  
+  db 0x0        
 
 gdt_end:
 ; ...
@@ -118,15 +126,9 @@ gdt_descriptor:
   dw gdt_end - gdt_start - 1
   dd gdt_start
   
-  ; lgdt [gdt_descriptor]
 
-  ; mov ax, 0x10
-  ; mov ds, ax
-  ; mov es, ax
-  ; mov fs, ax
-  ; mov gs, ax
-  ; mov ss, ax  
-
+CODE_SEG equ gdt_code - gdt_start 
+DATA_SEG equ gdt_data - gdt_start 
 ;
 ; Part 3
 ;
@@ -139,8 +141,18 @@ gdt_descriptor:
 [bits 16]
 
 switch_to_pm:
-; ...
-call init_pm
+
+  lgdt [gdt_descriptor]
+  cli
+  
+  in	al, 92h
+	or	al, 00000010b
+	out	92h, al
+
+  mov eax, cr0
+  or eax, 0x1
+  mov cr0, eax
+  jmp CODE_SEG:init_pm
 
 
 
@@ -149,8 +161,14 @@ call init_pm
 ; Some other function(s) that set the registers and stack pointers
 ; At the end of the function, call BEGIN_PM
 init_pm:
-call BEGIN_PM
-
+  mov ax, 0x10
+  mov ds, ax
+  mov es, ax
+  mov fs, ax
+  mov gs, ax
+  mov ss, ax
+  call BEGIN_PM
+  ret
 
 
 
@@ -165,6 +183,7 @@ call BEGIN_PM
 BEGIN_PM:
   mov ebx, MSG_PMODE      ; Print message indicating we are in real mode.
   call print_string_pm
+  ret
   call KERNEL_OFFSET      ; Begin executing the kernel.
   jmp $                   ; If return ever controls from the kernel, hang.
 
@@ -179,9 +198,8 @@ BOOT_DRIVE db 0x0
 MSG_REAL_MODE:
   db "started in 16-bit real mode", 0xa, 0xd, 0x0
 
-
 MSG_PMODE:
-  db "successfully landed in 32-bit protected mode.", 0x0
+  db "successfully landed in 32-bit protected mode." ,0x0
 
 MSG_SSD_SUCCESS:
   db "load ssd success", 0xa, 0xd, 0x0
