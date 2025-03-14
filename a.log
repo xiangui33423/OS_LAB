@@ -1,0 +1,38 @@
+
+kernel.o:     file format elf32-i386
+
+
+Disassembly of section .text:
+
+00000000 <kernel_main>:
+   0:	55                   	push   %ebp
+   1:	89 e5                	mov    %esp,%ebp
+   3:	83 ec 08             	sub    $0x8,%esp
+   6:	83 ec 08             	sub    $0x8,%esp
+   9:	6a 08                	push   $0x8
+   b:	6a 00                	push   $0x0
+   d:	e8 fc ff ff ff       	call   e <kernel_main+0xe>
+  12:	83 c4 10             	add    $0x10,%esp
+  15:	83 ec 08             	sub    $0x8,%esp
+  18:	6a 02                	push   $0x2
+  1a:	68 00 00 00 00       	push   $0x0
+  1f:	e8 fc ff ff ff       	call   20 <kernel_main+0x20>
+  24:	83 c4 10             	add    $0x10,%esp
+  27:	83 ec 08             	sub    $0x8,%esp
+  2a:	6a 03                	push   $0x3
+  2c:	68 20 00 00 00       	push   $0x20
+  31:	e8 fc ff ff ff       	call   32 <kernel_main+0x32>
+  36:	83 c4 10             	add    $0x10,%esp
+  39:	83 ec 08             	sub    $0x8,%esp
+  3c:	6a 04                	push   $0x4
+  3e:	68 40 00 00 00       	push   $0x40
+  43:	e8 fc ff ff ff       	call   44 <kernel_main+0x44>
+  48:	83 c4 10             	add    $0x10,%esp
+  4b:	83 ec 08             	sub    $0x8,%esp
+  4e:	6a 05                	push   $0x5
+  50:	68 00 00 00 00       	push   $0x0
+  55:	e8 fc ff ff ff       	call   56 <kernel_main+0x56>
+  5a:	83 c4 10             	add    $0x10,%esp
+  5d:	90                   	nop
+  5e:	c9                   	leave  
+  5f:	c3                   	ret    

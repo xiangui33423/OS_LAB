@@ -46,18 +46,26 @@ start:
 ;
 
 [bits 16]
-
 load_kernel_from_disk:
 
   mov bx, MSG_LOAD_KERNEL ; Print message for kernel load.
   call print_string
-
-  mov ah, 0x2
-  mov al, 2
-  mov CX, 0x2
-  mov DX, 80h
+  
   mov bx, KERNEL_OFFSET
+  mov dh, 0x1
+  mov dl, [BOOT_DRIVE]
+
+  pusha
+  push dx
+  mov ah, 0x2
+  mov al, 25
+  mov CX, 0x2
+  mov dh, 0x0
+
+
   int 0x13
+  pop dx
+
   jc load_failed          ; If carry flag is set, the read failed
 
   mov bx, MSG_KERNEL_LOAD_SUCCESS
@@ -67,8 +75,10 @@ load_kernel_from_disk:
 load_failed:
   mov bx, MSG_KERNEL_LOAD_FAILED
   call print_string
-
+  call load_kernel_from_disk
 load_done:
+  popa
+
   ret
 
 ;
@@ -126,12 +136,9 @@ DATA_SEG equ gdt_data - gdt_start
 
 switch_to_pm:
 
-  lgdt [gdt_descriptor]
+ 
   cli
-  
-  in	al, 92h
-	or	al, 00000010b
-	out	92h, al
+  lgdt [gdt_descriptor]
 
   mov eax, cr0
   or eax, 0x1
@@ -149,9 +156,11 @@ init_pm:
   mov ds, ax
   mov es, ax
   mov fs, ax
-  mov esp, KERNEL_START_ADDRESS
+  mov gs, ax 
+  mov ss, ax 
+  mov ebp, 0x90000
+  mov esp, ebp
   call BEGIN_PM
-  ret
 
 
 ;
@@ -164,6 +173,7 @@ BEGIN_PM:
   mov ebx, MSG_PMODE      ; Print message indicating we are in real mode.
   call print_string_pm
   call KERNEL_OFFSET      ; Begin executing the kernel.
+  
   jmp $                   ; If return ever controls from the kernel, hang.
 
 
@@ -173,7 +183,7 @@ BEGIN_PM:
 %include "print_string.asm"
 
 BOOT_DRIVE db 0x0
-
+SUECCSS_ENTER: db "Successfully entered mode", 0
 MSG_REAL_MODE:
   db "started in 16-bit real mode", 0xa, 0xd, 0x0
 
