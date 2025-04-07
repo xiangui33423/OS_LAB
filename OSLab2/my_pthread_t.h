@@ -26,18 +26,6 @@
 
 typedef uint my_pthread_t;
 
-typedef struct threadControlBlock {
-	/* add important states in a thread control block */
-	// thread Id
-	// thread status
-	// thread context
-	// thread stack
-	// thread priority
-	// And more ...
-
-	// YOUR CODE HERE
-} tcb; 
-
 /* mutex struct definition */
 typedef struct my_pthread_mutex_t {
 	/* add something here */
@@ -65,8 +53,21 @@ typedef enum schedPolicy {
 	POLICY_PSJF
 } schedPolicy;
 
-// YOUR CODE HERE
-
+typedef struct threadControlBlock {
+	/* add important states in a thread control block */
+	// thread Id
+	// thread status
+	// thread context
+	// thread stack
+	// thread priority
+	// And more ...
+	my_pthread_t threadId;
+	threadStatus status;
+	ucontext_t context;
+	void *stack;
+	schedPolicy policy;
+	// YOUR CODE HERE
+} tcb; 
 
 /* Function Declarations: */
 
