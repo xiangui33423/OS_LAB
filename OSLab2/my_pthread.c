@@ -3,20 +3,73 @@
 // Date:	April 2025
 
 #include "my_pthread_t.h"
+#include <stdlib.h>
+#include <sys/ucontext.h>
+#include <ucontext.h>
 
 // INITAILIZE ALL YOUR VARIABLES HERE
 // YOUR CODE HERE
+#define MAX_THREAD_NUM 128
+#define STACK_SIZE 64*1024	
 
+static tcb thread_pool[MAX_THREAD_NUM]; // thread pool
+static my_pthread_t thread_count = 0;
+static my_pthread_t current_thread = 0;
+static ucontext_t scheduler_context;
 
+// Ready queue for PSJF
+static Queue* ready_queue;
+static void enqueue(Queue *queue, tcb *thread)
+{
+	Node *new_node = (Node *)malloc(sizeof(Node));
+	new_node->thread = thread;
+	new_node->next = NULL;
+	if (queue->roar == NULL) {
+		queue->front = queue->roar = new_node;
+	} else {
+		queue->roar->next = new_node;
+		queue->roar = NULL;
+	}
+	return;
+}
 /* create a new thread */
 int my_pthread_create(my_pthread_t * thread, pthread_attr_t * attr, 
                       void *(*function)(void*), void * arg) {
 	// Create Thread Control Block
 	// Create and initialize the context of this thread
 	// Allocate space of stack for this thread to run
-	// After everything is all set, push this thread into run queue
-
+	// After everything is all set, push this thread into run queue				
 	// YOUR CODE HERE
+	my_pthread_t tcb_id = thread_count++;
+	tcb *new_thread = &thread_pool[tcb_id];
+	new_thread->threadId = tcb_id;
+	new_thread->status = NOT_STARTED;
+	new_thread->policy = POLICY_RR;
+
+	getcontext(&(new_thread->context));
+	new_thread->stack = malloc(STACK_SIZE);
+	if (new_thread->stack == NULL) {
+		return -1;
+	}
+
+	new_thread->context.uc_link = 0;
+	new_thread->context.uc_stack.ss_sp = new_thread->stack;
+	new_thread->context.uc_stack.ss_size = STACK_SIZE;
+	new_thread->context.uc_stack.ss_flags = 0;
+	if (new_thread->context.uc_stack.ss_sp == 0) {
+		perror( "malloc: Could not allocate stack" );
+        exit( 1 );
+	}
+
+	makecontext(&(new_thread->context), (void (*)(void)) function, 0);
+	new_thread->status = READY;
+	#ifndef MLFQ
+    enqueue(ready_queue, new_thread);
+    #else
+    enqueue(mlfq->queues[0], new_thread);  // Start at highest priority queue
+    #endif
+    
+	*thread = tcb_id;
 	return 0;
 };
 
@@ -25,7 +78,17 @@ int my_pthread_yield() {
 	// Change thread state from Running to Ready
 	// Save context of this thread to its thread control block
 	// Switch from thread context to scheduler context
+	thread_pool[current_thread].status = READY;
 
+	 // Add current thread back to ready queue
+	 #ifndef MLFQ
+	 enqueue(ready_queue, &thread_pool[current_thread]);
+	 #else
+	 // In MLFQ, add to appropriate level based on priority
+	 enqueue(mlfq->queues[thread_pool[current_thread].priority], &thread_pool[current_thread]);
+	 #endif
+
+	swapcontext(&(thread_pool[current_thread].context), &scheduler_context);
 	// YOUR CODE HERE
 	return 0;
 };
@@ -33,7 +96,7 @@ int my_pthread_yield() {
 /* terminate a thread */
 void my_pthread_exit(void *value_ptr) {
 	// Deallocated any dynamic memory created when starting this thread
-
+	
 	// YOUR CODE HERE
 };
 
