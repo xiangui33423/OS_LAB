@@ -36,10 +36,12 @@ typedef struct my_pthread_mutex_t {
 /* define your data structures here: */
 // Feel free to add your own auxiliary data structures (linked list or queue etc...)
 
+
 // Below are some examples, feel free to modify and define your own structures:
 // Thread Status
 typedef enum threadStatus {
 	NOT_STARTED = 0,
+	READY,
 	RUNNING,
 	SUSPENDED,
 	TERMINATED,
@@ -70,7 +72,14 @@ typedef struct threadControlBlock {
 } tcb; 
 
 /* Function Declarations: */
-
+typedef struct{
+	tcb *thread;
+	struct Node *next;
+}Node;
+typedef struct{
+	Node *front;
+	Node *roar;
+} Queue;
 /* create a new thread */
 int my_pthread_create(my_pthread_t * thread, pthread_attr_t * attr, void *(*function)(void*), void * arg);
 
