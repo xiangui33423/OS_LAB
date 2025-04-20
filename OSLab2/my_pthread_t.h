@@ -68,6 +68,8 @@ typedef struct threadControlBlock {
 	ucontext_t context;
 	void *stack;
 	schedPolicy policy;
+	void *return_value;
+	struct threadControlBlock* waiting_thread;
 	// YOUR CODE HERE
 } tcb; 
 

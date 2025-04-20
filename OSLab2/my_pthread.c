@@ -28,10 +28,19 @@ static void enqueue(Queue *queue, tcb *thread)
 		queue->front = queue->roar = new_node;
 	} else {
 		queue->roar->next = new_node;
-		queue->roar = NULL;
+		queue->roar = new_node;
 	}
 	return;
 }
+
+static tcb* get_thread_by_id(my_pthread_t t_id)
+{
+	if (t_id < MAX_THREAD_NUM && thread_pool[t_id].threadId == t_id) {
+		return &thread_pool[t_id];
+	}
+	return NULL;
+}
+
 /* create a new thread */
 int my_pthread_create(my_pthread_t * thread, pthread_attr_t * attr, 
                       void *(*function)(void*), void * arg) {
@@ -96,7 +105,19 @@ int my_pthread_yield() {
 /* terminate a thread */
 void my_pthread_exit(void *value_ptr) {
 	// Deallocated any dynamic memory created when starting this thread
-	
+	thread_pool[current_thread].status = FINISHED;
+
+	thread_pool[current_thread].return_value = value_ptr;
+
+	if (thread_pool[current_thread].waiting_thread != NULL) {
+		thread_pool[current_thread].waiting_thread->status = READY;
+		enqueue(ready_queue, thread_pool[current_thread].waiting_thread);
+	}
+
+	free(thread_pool[current_thread].stack);
+	thread_pool[current_thread].stack = NULL;
+
+	setcontext(&scheduler_context);
 	// YOUR CODE HERE
 };
 
@@ -106,7 +127,7 @@ int my_pthread_join(my_pthread_t thread, void **value_ptr) {
 	// Waiting for a specific thread to terminate
 	// Once this thread finishes,
 	// Deallocated any dynamic memory created when starting this thread
-  
+
 	// YOUR CODE HERE
 	return 0;
 };
@@ -115,7 +136,6 @@ int my_pthread_join(my_pthread_t thread, void **value_ptr) {
 int my_pthread_mutex_init(my_pthread_mutex_t *mutex, 
                           const pthread_mutexattr_t *mutexattr) {
 	// Initialize data structures for this mutex
-
 	// YOUR CODE HERE
 	return 0;
 };
