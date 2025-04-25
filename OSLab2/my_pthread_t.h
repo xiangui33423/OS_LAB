@@ -29,7 +29,10 @@ typedef uint my_pthread_t;
 /* mutex struct definition */
 typedef struct my_pthread_mutex_t {
 	/* add something here */
-
+	int lock;
+	my_pthread_t owner;
+	int initialized;
+	struct MUX_Node* waiting_list;
 	// YOUR CODE HERE
 } my_pthread_mutex_t;
 
@@ -73,6 +76,10 @@ typedef struct threadControlBlock {
 	// YOUR CODE HERE
 } tcb; 
 
+typedef struct MUX_Node{
+	tcb* thread;
+	struct MUX_Node* next;
+} MUX_Node;
 /* Function Declarations: */
 typedef struct{
 	tcb *thread;
