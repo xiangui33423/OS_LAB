@@ -1,0 +1,13 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-g",
+      "-c",
+      "-m32",
+      "my_vm.c"
+    ],
+    "directory": "/home/xiangui/os_lab/OSLab3",
+    "file": "/home/xiangui/os_lab/OSLab3/my_vm.c"
+  }
+]
