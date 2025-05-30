@@ -1,6 +1,13 @@
 #ifndef __DEFINES_H__
 #define __DEFINES_H__
 
+#define PTE_PRESENT         0x80000000
+#define PTE_SWAPPED         0x40000000
+#define PTE_DIRTY           0x20000000
+#define PTE_ACCESSED        0x10000000
+#define PFN_SHIFT           0x0
+#define PFN_DISK_ADDR_MASK  0x0003FFFF
+#define PTE_ADDR_MASK       0x000FFFFF
 
 // 32-bit address space, 
 // out of which 48 bits are used in modern OS.

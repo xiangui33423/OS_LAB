@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdint.h>
-
+#include <pthread.h>
 #include "defines.h"
 
 /*
